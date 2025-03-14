@@ -20,7 +20,11 @@
     "lint": "eslint . --fix",
     "format": "prettier . --write",
     "clean": "rimraf dist",
-    "clean:all": "rimraf node_modules dist"
+    "clean:all": "rimraf node_modules dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
   },
   "keywords": [
     "claude",
@@ -41,6 +45,8 @@
     "@types/node": "^22.13.10",
     "@typescript-eslint/eslint-plugin": "^8.23.0",
     "@typescript-eslint/parser": "^8.23.0",
+    "@vitest/coverage-v8": "^3.0.8",
+    "@vitest/ui": "^3.0.8",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9",
     "eslint-import-resolver-typescript": "^3.8.3",
@@ -51,6 +57,7 @@
     "prettier": "^3.5.1",
     "type-fest": "^4.37.0",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.23.0"
+    "typescript-eslint": "^8.23.0",
+    "vitest": "^3.0.8"
   }
 }
