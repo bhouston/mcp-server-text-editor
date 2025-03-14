@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "bin": {
-    "mcp-server-text-editor": "./dist/index.js"
+    "mcp-server-text-editor": "dist/index.js"
   },
   "files": [
     "dist"
@@ -22,7 +22,13 @@
     "clean": "rimraf dist",
     "clean:all": "rimraf node_modules dist"
   },
-  "keywords": ["claude", "text-editor", "mcp", "model-context-protocol", "ai-tools"],
+  "keywords": [
+    "claude",
+    "text-editor",
+    "mcp",
+    "model-context-protocol",
+    "ai-tools"
+  ],
   "author": "Ben Houston",
   "license": "MIT",
   "dependencies": {
