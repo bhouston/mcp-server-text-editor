@@ -1,14 +1,19 @@
 {
-  "name": "claude-text-editor-mcp",
+  "name": "mcp-server-text-editor",
   "description": "An open source implementation of the Claude built-in text editor tool",
   "version": "0.0.1",
   "type": "module",
   "bin": {
-    "weather": "./dist/index.js"
+    "mcp-server-text-editor": "./dist/index.js"
   },
   "files": [
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bhouston/mcp-server-text-editor.git"
+  },
+  "homepage": "https://github.com/bhouston/mcp-server-text-editor",
   "scripts": {
     "build": "tsc && chmod 755 ./dist/index.js",
     "typecheck": "pnpm -r typecheck",
@@ -17,9 +22,9 @@
     "clean": "rimraf dist",
     "clean:all": "rimraf node_modules dist"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["claude", "text-editor", "mcp", "model-context-protocol", "ai-tools"],
+  "author": "Ben Houston",
+  "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.7.0",
     "rimraf": "^6.0.1",

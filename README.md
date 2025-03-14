@@ -26,10 +26,10 @@ This package implements the following Claude text editor tool versions:
 
 ```bash
 # Install from npm
-npm install mcp-server-claude-text-editor
+npm install mcp-server-text-editor
 
 # Or with pnpm
-pnpm add mcp-server-claude-text-editor
+pnpm add mcp-server-text-editor
 ```
 
 ## Usage
@@ -38,10 +38,10 @@ pnpm add mcp-server-claude-text-editor
 
 ```bash
 # Using npx
-npx mcp-server-claude-text-editor
+npx mcp-server-text-editor
 
 # Or if installed globally
-mcp-server-claude-text-editor
+mcp-server-text-editor
 ```
 
 ### Integration with Claude
@@ -147,8 +147,8 @@ Revert the last edit made to a file.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/mcp-server-claude-text-editor.git
-cd mcp-server-claude-text-editor
+git clone https://github.com/bhouston/mcp-server-text-editor.git
+cd mcp-server-text-editor
 
 # Install dependencies
 pnpm install
