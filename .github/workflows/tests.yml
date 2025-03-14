@@ -6,22 +6,25 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  PNPM_VERSION: 10.2.1
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8
+          node-version-file: .nvmrc
       - run: pnpm install
       - run: pnpm build
       - run: pnpm test
       - run: pnpm test:coverage
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: coverage/
