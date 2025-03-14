@@ -1,0 +1,78 @@
+{
+  "cSpell.words": [
+    "agentic",
+    "agentify",
+    "AILLM",
+    "astify",
+    "bhouston",
+    "Buildx",
+    "bunx",
+    "cacheable",
+    "cloudsql",
+    "codegen",
+    "esbuild",
+    "fortawesome",
+    "functiondef",
+    "gcloud",
+    "GLTF",
+    "healthcheck",
+    "indexdef",
+    "interruptible",
+    "ISJSON",
+    "kysely",
+    "lerp",
+    "Linearizer",
+    "llms",
+    "microbundle",
+    "Millis",
+    "modelcontextprotocol",
+    "mycoder",
+    "Nullary",
+    "NVARCHAR",
+    "OLLAMA",
+    "proname",
+    "reactflow",
+    "recordset",
+    "reserialization",
+    "reserialized",
+    "schemaname",
+    "seperator",
+    "Slerp",
+    "sqlify",
+    "tablename",
+    "tailwindcss",
+    "tgisinternal",
+    "threeify",
+    "transpiling",
+    "triggerdef",
+    "vinxi"
+  ],
+
+  "eslint.probe": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "markdown",
+    "html",
+    "json"
+  ],
+
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.rulers": [160],
+
+  // Workbench
+  "workbench.editor.enablePreview": false, // Opens files in new tab instead of preview
+
+  // JavaScript/TypeScript specific
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "javascript.preferences.importModuleSpecifier": "relative",
+
+  // TypeScript specific
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.preferences.importModuleSpecifier": "relative",
+
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": ["source.formatDocument", "source.fixAll.eslint"]
+}

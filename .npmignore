@@ -1,0 +1,15 @@
+.changeset
+.vscode
+dist/*.test.*
+internal_docs
+node_modules
+src
+.env
+.gitignore
+.npmignore
+.prettierignore
+eslint.config.js
+pnpm-lock.yaml
+tsconfig.json
+vitest.config.js
+build
