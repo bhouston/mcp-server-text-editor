@@ -48,10 +48,23 @@ pnpm add mcp-server-text-editor
 
 ```bash
 # Using npx
-npx mcp-server-text-editor
+npx -y mcp-server-text-editor
 
 # Or if installed globally
 mcp-server-text-editor
+```
+
+### Configuring in Claude Desktop
+
+```json
+{
+  "mcpServers": {
+    "textEditor": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-text-editor"]
+    }
+  }
+}
 ```
 
 ### Tool Commands
