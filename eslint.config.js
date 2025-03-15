@@ -67,17 +67,6 @@ export default ts.config(
     },
   },
   {
-    ignores: [
-      '**/dist',
-      '**/_doNotUse',
-      '**/node_modules',
-      '**/.vinxi',
-      '**/.output',
-      '**/pnpm-lock.yaml',
-      '**/routeTree.gen.ts',
-      'scripts/verify-release-config.js',
-      '**/.docusaurus',
-      '**/build',
-    ],
+    ignores: ['dist', 'node_modules', 'test/fixtures/sample-files'],
   },
 );

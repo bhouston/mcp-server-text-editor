@@ -1,13 +1,21 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import * as path from 'path';
+import * as fsSync from 'fs';
 import * as fs from 'fs/promises';
+import * as path from 'path';
+
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
 import { textEditorExecute } from '../../../src/tools/textEditor';
-import { 
-  createTempTestDir, 
-  cleanupTempTestDir, 
+import {
+  createTempTestDir,
+  cleanupTempTestDir,
   copyFixtureToTestDir,
-  ensureTempDirExists
+  ensureTempDirExists,
 } from '../../helpers/fileSystem';
+
+// Mock modules
+vi.mock('fs/promises');
+vi.mock('fs');
+vi.mock('child_process');
 
 // Setup before all tests
 beforeEach(async () => {
@@ -62,6 +70,58 @@ describe('textEditor', () => {
       expect(content.content).not.toContain('5: This is line 5.');
     });
 
+    it('should handle view range with null start and end=-1', async () => {
+      const result = await textEditorExecute({
+        command: 'view',
+        path: testFilePath,
+        // @ts-expect-error Testing with null start
+        view_range: [null, -1],
+        description: 'Testing view command with null start and end=-1',
+      });
+
+      const content = JSON.parse(result.content[0].text);
+      expect(content.success).toBe(true);
+      expect(content.message).toBe('File content:');
+      // Should show all lines since start defaults to 1 and end=-1 means show to end
+      expect(content.content).toContain('1: This is a sample text file.');
+      expect(content.content).toContain('5: This is line 5.');
+    });
+
+    it('should handle view range with startLineNum=null in line numbering', async () => {
+      const result = await textEditorExecute({
+        command: 'view',
+        path: testFilePath,
+        // @ts-expect-error Testing with null start for line numbering
+        view_range: [null, 5],
+        description: 'Testing view command with null startLineNum',
+      });
+
+      const content = JSON.parse(result.content[0].text);
+      expect(content.success).toBe(true);
+      expect(content.message).toBe('File content:');
+      // Line numbers should start from 1 by default
+      expect(content.content).toContain('1: This is a sample text file.');
+    });
+
+    it('should truncate large file content', async () => {
+      // Create a large file
+      const largeFilePath = path.join(testDir, 'large-file.txt');
+      const largeContent = 'A'.repeat(15 * 1024); // 15KB, larger than 10KB limit
+      await fs.writeFile(largeFilePath, largeContent, 'utf8');
+
+      const result = await textEditorExecute({
+        command: 'view',
+        path: largeFilePath,
+        description: 'Testing truncating large file content',
+      });
+
+      const content = JSON.parse(result.content[0].text);
+      expect(content.success).toBe(true);
+      expect(content.message).toBe('File content (truncated):');
+      expect(content.content).toContain('<response clipped>');
+      expect(content.content.length).toBeLessThan(largeContent.length);
+    });
+
     it('should handle viewing a directory', async () => {
       // Mock execSync to avoid actual system calls
       vi.mock('child_process', () => ({
@@ -79,9 +139,32 @@ describe('textEditor', () => {
       expect(content.message).toContain('Directory listing for');
     });
 
+    it('should handle errors when listing directories', async () => {
+      // Mock execSync to throw an error
+      const originalExecSync = execSync;
+      (execSync as Mock) = vi.fn().mockImplementation(() => {
+        throw new Error('Directory listing error');
+      });
+
+      try {
+        const result = await textEditorExecute({
+          command: 'view',
+          path: testDir,
+          description: 'Testing error handling in directory listing',
+        });
+
+        const content = JSON.parse(result.content[0].text);
+        expect(content.success).toBe(false);
+        expect(content.message).toContain('Error listing directory');
+      } finally {
+        // Restore original implementation
+        (execSync as any) = originalExecSync;
+      }
+    });
+
     it('should handle non-existent files', async () => {
       const nonExistentPath = path.join(testDir, 'non-existent.txt');
-      
+
       const result = await textEditorExecute({
         command: 'view',
         path: nonExistentPath,
@@ -98,7 +181,7 @@ describe('textEditor', () => {
     it('should create a new file', async () => {
       const newFilePath = path.join(testDir, 'new-file.txt');
       const fileContent = 'This is a new file created by the test.';
-      
+
       const result = await textEditorExecute({
         command: 'create',
         path: newFilePath,
@@ -109,7 +192,7 @@ describe('textEditor', () => {
       const content = JSON.parse(result.content[0].text);
       expect(content.success).toBe(true);
       expect(content.message).toContain('File created');
-      
+
       // Verify file was actually created
       const actualContent = await fs.readFile(newFilePath, 'utf8');
       expect(actualContent).toBe(fileContent);
@@ -117,7 +200,7 @@ describe('textEditor', () => {
 
     it('should overwrite an existing file', async () => {
       const fileContent = 'This content will overwrite the existing file.';
-      
+
       const result = await textEditorExecute({
         command: 'create',
         path: testFilePath,
@@ -128,7 +211,7 @@ describe('textEditor', () => {
       const content = JSON.parse(result.content[0].text);
       expect(content.success).toBe(true);
       expect(content.message).toContain('File overwritten');
-      
+
       // Verify file was actually overwritten
       const actualContent = await fs.readFile(testFilePath, 'utf8');
       expect(actualContent).toBe(fileContent);
@@ -160,10 +243,59 @@ describe('textEditor', () => {
       const content = JSON.parse(result.content[0].text);
       expect(content.success).toBe(true);
       expect(content.message).toContain('Successfully replaced text');
-      
+
       // Verify the text was actually replaced
       const actualContent = await fs.readFile(testFilePath, 'utf8');
       expect(actualContent).toContain('It has replaced lines');
+      expect(actualContent).not.toContain('It has multiple lines');
+    });
+
+    it("should initialize fileStateHistory for str_replace if it doesn't exist", async () => {
+      // Create a new file that doesn't have history yet
+      const newFilePath = path.join(testDir, 'new-str-replace.txt');
+      await fs.writeFile(
+        newFilePath,
+        'This is a test string to replace.',
+        'utf8',
+      );
+
+      // Delete any existing history for this file (accessing private state)
+      // @ts-expect-error Accessing private module state for testing
+      const fileStateHistory = (await import('../../../src/tools/textEditor'))
+        .fileStateHistory;
+      delete fileStateHistory[newFilePath];
+
+      const result = await textEditorExecute({
+        command: 'str_replace',
+        path: newFilePath,
+        old_str: 'test string',
+        new_str: 'modified string',
+        description: 'Testing str_replace with new history',
+      });
+
+      const content = JSON.parse(result.content[0].text);
+      expect(content.success).toBe(true);
+
+      // Verify the text was replaced
+      const actualContent = await fs.readFile(newFilePath, 'utf8');
+      expect(actualContent).toContain('This is a modified string to replace.');
+    });
+
+    it('should handle empty new_str in str_replace', async () => {
+      const result = await textEditorExecute({
+        command: 'str_replace',
+        path: testFilePath,
+        old_str: 'multiple lines',
+        // Intentionally not providing new_str
+        description: 'Testing str_replace with empty new_str',
+      });
+
+      const content = JSON.parse(result.content[0].text);
+      expect(content.success).toBe(true);
+
+      // Verify the text was replaced with empty string
+      const actualContent = await fs.readFile(testFilePath, 'utf8');
+      expect(actualContent).toContain('It has ');
       expect(actualContent).not.toContain('It has multiple lines');
     });
 
@@ -182,7 +314,7 @@ describe('textEditor', () => {
 
     it('should handle non-existent files', async () => {
       const nonExistentPath = path.join(testDir, 'non-existent.txt');
-      
+
       const result = await textEditorExecute({
         command: 'str_replace',
         path: nonExistentPath,
@@ -199,8 +331,12 @@ describe('textEditor', () => {
     it('should handle multiple occurrences of old_str', async () => {
       // Create a file with duplicate text
       const duplicateFilePath = path.join(testDir, 'duplicate.txt');
-      await fs.writeFile(duplicateFilePath, 'This is a test. This is a test.', 'utf8');
-      
+      await fs.writeFile(
+        duplicateFilePath,
+        'This is a test. This is a test.',
+        'utf8',
+      );
+
       const result = await textEditorExecute({
         command: 'str_replace',
         path: duplicateFilePath,
@@ -242,7 +378,7 @@ describe('textEditor', () => {
       const content = JSON.parse(result.content[0].text);
       expect(content.success).toBe(true);
       expect(content.message).toContain('Successfully inserted text');
-      
+
       // Verify the text was actually inserted
       const actualContent = await fs.readFile(testFilePath, 'utf8');
       const lines = actualContent.split('\n');
@@ -288,6 +424,56 @@ describe('textEditor', () => {
       expect(content.success).toBe(false);
       expect(content.message).toContain('Invalid line number');
     });
+
+    it('should handle file not found in insert command', async () => {
+      // Mock existsSync to simulate file not found
+      const originalExistsSync = fsSync.existsSync;
+      fsSync.existsSync = vi.fn().mockReturnValue(false);
+
+      try {
+        const result = await textEditorExecute({
+          command: 'insert',
+          path: path.join(testDir, 'non-existent.txt'),
+          insert_line: 1,
+          new_str: 'This should not be inserted',
+          description: 'Testing insert with non-existent file',
+        });
+
+        const content = JSON.parse(result.content[0].text);
+        expect(content.success).toBe(false);
+        expect(content.message).toContain('File not found');
+      } finally {
+        // Restore original implementation
+        fsSync.existsSync = originalExistsSync;
+      }
+    });
+
+    it("should initialize fileStateHistory for insert if it doesn't exist", async () => {
+      // Create a new file that doesn't have history yet
+      const newFilePath = path.join(testDir, 'new-insert.txt');
+      await fs.writeFile(newFilePath, 'Line 1\nLine 2', 'utf8');
+
+      // Delete any existing history for this file (accessing private state)
+      // @ts-expect-error Accessing private module state for testing
+      const fileStateHistory = (await import('../../../src/tools/textEditor'))
+        .fileStateHistory;
+      delete fileStateHistory[newFilePath];
+
+      const result = await textEditorExecute({
+        command: 'insert',
+        path: newFilePath,
+        insert_line: 1,
+        new_str: 'Inserted line',
+        description: 'Testing insert with new history',
+      });
+
+      const content = JSON.parse(result.content[0].text);
+      expect(content.success).toBe(true);
+
+      // Verify the line was inserted
+      const actualContent = await fs.readFile(newFilePath, 'utf8');
+      expect(actualContent).toBe('Line 1\nInserted line\nLine 2');
+    });
   });
 
   describe('undo_edit command', () => {
@@ -300,7 +486,7 @@ describe('textEditor', () => {
         new_str: 'replaced lines',
         description: 'Making an edit to undo later',
       });
-      
+
       // Then undo it
       const result = await textEditorExecute({
         command: 'undo_edit',
@@ -311,7 +497,7 @@ describe('textEditor', () => {
       const content = JSON.parse(result.content[0].text);
       expect(content.success).toBe(true);
       expect(content.message).toContain('Successfully reverted last edit');
-      
+
       // Verify the file was restored
       const actualContent = await fs.readFile(testFilePath, 'utf8');
       expect(actualContent).toContain('It has multiple lines');
@@ -321,7 +507,7 @@ describe('textEditor', () => {
     it('should handle undo with no history', async () => {
       const newFilePath = path.join(testDir, 'no-history.txt');
       await fs.writeFile(newFilePath, 'File with no edit history', 'utf8');
-      
+
       const result = await textEditorExecute({
         command: 'undo_edit',
         path: newFilePath,
@@ -358,6 +544,29 @@ describe('textEditor', () => {
       const content = JSON.parse(result.content[0].text);
       expect(content.success).toBe(false);
       expect(content.message).toContain('Unknown command');
+    });
+
+    it('should handle non-Error objects in catch block', async () => {
+      // Mock fs.stat to throw a string instead of an Error
+      const originalStat = fs.stat;
+      fs.stat = vi.fn().mockImplementation(() => {
+        throw 'This is a string error';
+      });
+
+      try {
+        const result = await textEditorExecute({
+          command: 'view',
+          path: path.join(testDir, 'not-a-file.txt'),
+          description: 'Testing non-Error exception handling',
+        });
+
+        const content = JSON.parse(result.content[0].text);
+        expect(content.success).toBe(false);
+        expect(content.message).toBe('Unknown error');
+      } finally {
+        // Restore original implementation
+        fs.stat = originalStat;
+      }
     });
   });
 });

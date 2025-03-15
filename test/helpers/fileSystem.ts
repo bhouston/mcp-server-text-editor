@@ -25,17 +25,23 @@ export async function cleanupTempTestDir(dirPath: string): Promise<void> {
  * Copy a fixture file to a test directory
  */
 export async function copyFixtureToTestDir(
-  fixtureName: string, 
-  testDir: string, 
-  newName?: string
+  fixtureName: string,
+  testDir: string,
+  newName?: string,
 ): Promise<string> {
-  const fixturePath = path.join(process.cwd(), 'test', 'fixtures', 'sample-files', fixtureName);
+  const fixturePath = path.join(
+    process.cwd(),
+    'test',
+    'fixtures',
+    'sample-files',
+    fixtureName,
+  );
   const destName = newName || fixtureName;
   const destPath = path.join(testDir, destName);
-  
+
   const content = await fs.readFile(fixturePath, 'utf8');
   await fs.writeFile(destPath, content, 'utf8');
-  
+
   return destPath;
 }
 
