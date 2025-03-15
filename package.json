@@ -1,11 +1,9 @@
 {
   "name": "mcp-server-text-editor",
   "description": "An open source implementation of the Claude built-in text editor tool",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
-  "bin": {
-    "mcp-server-text-editor": "dist/index.js"
-  },
+  "bin": "bin/cli.js",
   "files": [
     "dist"
   ],
@@ -16,6 +14,7 @@
   "homepage": "https://github.com/bhouston/mcp-server-text-editor",
   "scripts": {
     "build": "tsc && chmod 755 ./dist/index.js",
+    "start": "node dist/index.js",
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint . --fix",
     "format": "prettier . --write",
@@ -23,7 +22,6 @@
     "clean:all": "rimraf node_modules dist",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage"
   },
   "keywords": [

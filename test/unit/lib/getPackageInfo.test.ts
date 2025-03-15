@@ -13,7 +13,7 @@ describe('getPackageInfo', () => {
       expect(packageJson.version).toBeDefined();
       expect(packageJson.type).toBe('module');
       expect(packageJson.bin).toBeDefined();
-      expect(packageJson.bin['mcp-server-text-editor']).toBe('dist/index.js');
+      expect(packageJson.bin).toBe('bin/cli.js');
     });
   });
 });

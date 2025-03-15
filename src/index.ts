@@ -19,11 +19,21 @@ server.tool(
 );
 
 async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error(
-    `${packageJson.name} MCP Server v${packageJson.version} running on stdio`,
-  );
+  console.error(`Starting ${packageJson.name} MCP Server v${packageJson.version}...`);
+  
+  try {
+    console.error('Initializing StdioServerTransport...');
+    const transport = new StdioServerTransport();
+    
+    console.error('Connecting server to transport...');
+    await server.connect(transport);
+    
+    console.error(`${packageJson.name} MCP Server v${packageJson.version} running on stdio`);
+    console.error('Server ready to accept commands');
+  } catch (error) {
+    console.error('Error during server startup:', error);
+    throw error;
+  }
 }
 
 main().catch((error) => {
