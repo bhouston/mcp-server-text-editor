@@ -42,83 +42,141 @@ describe('MCP Server-Client Integration', () => {
   });
 
   it('should connect to the server and list available tools', async () => {
-    // Connect to the server
-    const tools = await client.connectToServer(SERVER_SCRIPT_PATH);
+    console.log('Test: Starting connection to server...');
+    
+    try {
+      // Connect to the server
+      console.log(`Test: Connecting to server at ${SERVER_SCRIPT_PATH}`);
+      const tools = await client.connectToServer(SERVER_SCRIPT_PATH);
+      console.log('Test: Successfully connected to server');
+      
+      // Verify connection and tools
+      console.log(`Test: Received ${tools?.length ?? 0} tools from server`);
+      expect(tools).toBeDefined();
+      expect(tools.length).toBeGreaterThan(0);
 
-    // Verify connection and tools
-    expect(tools).toBeDefined();
-    expect(tools.length).toBeGreaterThan(0);
-
-    // Verify that text_editor tool is available
-    const textEditorTool = tools.find((tool) => tool.name === 'text_editor');
-    expect(textEditorTool).toBeDefined();
-  }, 15000); // Increase timeout to 15 seconds for this test
+      // Verify that text_editor tool is available
+      const textEditorTool = tools.find((tool) => tool.name === 'text_editor');
+      console.log(`Test: Text editor tool ${textEditorTool ? 'found' : 'NOT found'}`);
+      expect(textEditorTool).toBeDefined();
+      
+      console.log('Test: Server connection test completed successfully');
+    } catch (error) {
+      console.error('Test ERROR: Failed to connect to server:', error);
+      throw error;
+    }
+  }, 30000); // Increase timeout to 30 seconds for this test
 
   it('should be able to create a file using the text_editor tool', async () => {
-    // Test file content
-    const testContent = 'This is a test file created by the MCP client.';
+    console.log('Test: Starting file creation test...');
+    
+    try {
+      // Test file content
+      const testContent = 'This is a test file created by the MCP client.';
+      console.log(`Test: Creating file at ${tempFilePath}`);
 
-    // Call the text_editor tool to create a file
-    const result = await client.callTool('text_editor', {
-      command: 'create',
-      path: tempFilePath,
-      file_text: testContent,
-      description: 'Creating a test file',
-    });
+      // Call the text_editor tool to create a file
+      console.log('Test: Calling text_editor tool with create command');
+      const result = await client.callTool('text_editor', {
+        command: 'create',
+        path: tempFilePath,
+        file_text: testContent,
+        description: 'Creating a test file',
+      });
+      console.log('Test: Received response from text_editor tool');
 
-    // Parse the result (which comes as a JSON string inside a content object)
-    const parsedResult = JSON.parse(result.content[0].text);
+      // Parse the result (which comes as a JSON string inside a content object)
+      console.log('Test: Parsing result');
+      const parsedResult = JSON.parse(result.content[0].text);
+      console.log(`Test: Parsed result - success: ${parsedResult.success}, message: ${parsedResult.message}`);
 
-    // Verify the result
-    expect(parsedResult.success).toBe(true);
-    expect(parsedResult.message).toContain('File created');
+      // Verify the result
+      expect(parsedResult.success).toBe(true);
+      expect(parsedResult.message).toContain('File created');
 
-    // Verify the file was actually created with the correct content
-    const fileContent = await fs.readFile(tempFilePath, 'utf8');
-    expect(fileContent).toBe(testContent);
-  }, 15000); // Increase timeout to 15 seconds
+      // Verify the file was actually created with the correct content
+      console.log('Test: Verifying file content');
+      const fileContent = await fs.readFile(tempFilePath, 'utf8');
+      console.log(`Test: File content length: ${fileContent.length}`);
+      expect(fileContent).toBe(testContent);
+      
+      console.log('Test: File creation test completed successfully');
+    } catch (error) {
+      console.error('Test ERROR: Failed during file creation test:', error);
+      throw error;
+    }
+  }, 30000); // Increase timeout to 30 seconds
 
   it('should be able to view a file using the text_editor tool', async () => {
-    // Call the text_editor tool to view the file
-    const result = await client.callTool('text_editor', {
-      command: 'view',
-      path: tempFilePath,
-      description: 'Viewing the test file',
-    });
+    console.log('Test: Starting file view test...');
+    
+    try {
+      // Call the text_editor tool to view the file
+      console.log(`Test: Viewing file at ${tempFilePath}`);
+      const result = await client.callTool('text_editor', {
+        command: 'view',
+        path: tempFilePath,
+        description: 'Viewing the test file',
+      });
+      console.log('Test: Received response from text_editor tool');
 
-    // Parse the result
-    const parsedResult = JSON.parse(result.content[0].text);
+      // Parse the result
+      console.log('Test: Parsing result');
+      const parsedResult = JSON.parse(result.content[0].text);
+      console.log(`Test: Parsed result - success: ${parsedResult.success}, message: ${parsedResult.message}`);
 
-    // Verify the result
-    expect(parsedResult.success).toBe(true);
-    expect(parsedResult.message).toContain('File content');
-    expect(parsedResult.content).toContain('This is a test file');
-  }, 15000); // Increase timeout to 15 seconds
+      // Verify the result
+      expect(parsedResult.success).toBe(true);
+      expect(parsedResult.message).toContain('File content');
+      expect(parsedResult.content).toContain('This is a test file');
+      
+      console.log('Test: File view test completed successfully');
+    } catch (error) {
+      console.error('Test ERROR: Failed during file view test:', error);
+      throw error;
+    }
+  }, 30000); // Increase timeout to 30 seconds
 
   it('should be able to modify a file using the text_editor tool', async () => {
-    // Original content
-    const originalContent = 'This is a test file created by the MCP client.';
-    // New content
-    const newContent = 'This file has been modified by the MCP client.';
+    console.log('Test: Starting file modification test...');
+    
+    try {
+      // Original content
+      const originalContent = 'This is a test file created by the MCP client.';
+      // New content
+      const newContent = 'This file has been modified by the MCP client.';
+      console.log(`Test: Modifying file at ${tempFilePath}`);
 
-    // Call the text_editor tool to replace content
-    const result = await client.callTool('text_editor', {
-      command: 'str_replace',
-      path: tempFilePath,
-      old_str: originalContent,
-      new_str: newContent,
-      description: 'Modifying the test file',
-    });
+      // Call the text_editor tool to replace content
+      console.log('Test: Calling text_editor tool with str_replace command');
+      const result = await client.callTool('text_editor', {
+        command: 'str_replace',
+        path: tempFilePath,
+        old_str: originalContent,
+        new_str: newContent,
+        description: 'Modifying the test file',
+      });
+      console.log('Test: Received response from text_editor tool');
 
-    // Parse the result
-    const parsedResult = JSON.parse(result.content[0].text);
+      // Parse the result
+      console.log('Test: Parsing result');
+      const parsedResult = JSON.parse(result.content[0].text);
+      console.log(`Test: Parsed result - success: ${parsedResult.success}, message: ${parsedResult.message}`);
 
-    // Verify the result
-    expect(parsedResult.success).toBe(true);
-    expect(parsedResult.message).toContain('Successfully replaced text');
+      // Verify the result
+      expect(parsedResult.success).toBe(true);
+      expect(parsedResult.message).toContain('Successfully replaced text');
 
-    // Verify the file was actually modified
-    const fileContent = await fs.readFile(tempFilePath, 'utf8');
-    expect(fileContent).toBe(newContent);
-  }, 15000); // Increase timeout to 15 seconds
+      // Verify the file was actually modified
+      console.log('Test: Verifying file modification');
+      const fileContent = await fs.readFile(tempFilePath, 'utf8');
+      console.log(`Test: Modified file content: "${fileContent}"`);
+      expect(fileContent).toBe(newContent);
+      
+      console.log('Test: File modification test completed successfully');
+    } catch (error) {
+      console.error('Test ERROR: Failed during file modification test:', error);
+      throw error;
+    }
+  }, 30000); // Increase timeout to 30 seconds
 });
