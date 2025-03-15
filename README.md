@@ -8,7 +8,7 @@
   <img src="https://mintlify.s3.us-west-1.amazonaws.com/mcp/logo/dark.svg" alt="Model Context Protocol Logo" width="200"/>
 </p>
 
-An open-source implementation of the Claude built-in text editor tool as a Model Context Protocol (MCP) server. This package provides the same functionality as Claude's built-in text editor, allowing you to view, edit, and create text files through a standardized API.
+An open-source implementation of the Claude built-in text editor tool as a [Model Context Protocol](https://www.anthropic.com/news/model-context-protocol) (MCP) server. This package provides the same functionality as [Claude's built-in text editor tool](https://docs.anthropic.com/en/docs/build-with-claude/tool-use/text-editor-tool), allowing you to view, edit, and create text files through a standardized API.
 
 ## Features
 
@@ -25,10 +25,12 @@ An open-source implementation of the Claude built-in text editor tool as a Model
 
 ## Supported Claude Text Editor Versions
 
-This package implements the following Claude text editor tool versions:
+This package implements an equivalent tool to [the built-in Claude text editor tool](https://docs.anthropic.com/en/docs/build-with-claude/tool-use/text-editor-tool) versions:
 
 - `text_editor_20241022` (Claude 3.5 Sonnet)
 - `text_editor_20250124` (Claude 3.7 Sonnet)
+
+But using the tool name 'text_editor' to avoid name conflicts with built-in Claude tools.
 
 ## Installation
 
@@ -50,35 +52,6 @@ npx mcp-server-text-editor
 
 # Or if installed globally
 mcp-server-text-editor
-```
-
-### Integration with Claude
-
-To use this MCP server with Claude, you need to configure your Claude client to use this server as a tool. Here's an example using the Anthropic API:
-
-```javascript
-import anthropic from '@anthropic/sdk';
-
-const client = new anthropic.Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
-const response = await client.messages.create({
-  model: 'claude-3-7-sonnet-20250219',
-  max_tokens: 1024,
-  tools: [
-    {
-      type: 'text_editor_20250124',
-      name: 'str_replace_editor'
-    }
-  ],
-  messages: [
-    {
-      role: 'user',
-      content: 'There's a syntax error in my primes.py file. Can you help me fix it?'
-    }
-  ]
-});
 ```
 
 ### Tool Commands
