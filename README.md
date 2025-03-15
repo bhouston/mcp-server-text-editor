@@ -141,34 +141,22 @@ pnpm build
 ### Scripts
 
 - `pnpm build`: Build the TypeScript project
-- `pnpm typecheck`: Run TypeScript type checking
 - `pnpm lint`: Run ESLint with auto-fixing
 - `pnpm format`: Format code with Prettier
 - `pnpm clean`: Remove build artifacts
 - `pnpm clean:all`: Remove build artifacts and node_modules
 - `pnpm test`: Run tests
-- `pnpm test:watch`: Run tests in watch mode
-- `pnpm test:ui`: Run tests with UI
 - `pnpm test:coverage`: Run tests with coverage report
 
 ### Testing
 
-This project uses Vitest for testing. The test suite includes:
-
-- **Unit Tests**: Tests for individual functions and components
-- **Integration Tests**: Tests for the MCP server implementation
+This project uses Vitest for testing.
 
 To run the tests:
 
 ```bash
 # Run all tests
 pnpm test
-
-# Run tests in watch mode (useful during development)
-pnpm test:watch
-
-# Run tests with UI
-pnpm test:ui
 
 # Run tests with coverage report
 pnpm test:coverage
