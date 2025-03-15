@@ -22,7 +22,7 @@ export class MCPClient {
   async connectToServer(serverScriptPath: string): Promise<Tool[]> {
     try {
       console.log(`MCP Client: Connecting to server at ${serverScriptPath}`);
-      
+
       const isJs = serverScriptPath.endsWith('.js');
       const isPy = serverScriptPath.endsWith('.py');
 
@@ -35,7 +35,7 @@ export class MCPClient {
           ? 'python'
           : 'python3'
         : process.execPath;
-      
+
       console.log(`MCP Client: Using command: ${command} ${serverScriptPath}`);
 
       // Create transport that communicates with the server process
@@ -53,12 +53,17 @@ export class MCPClient {
       // List available tools
       console.log('MCP Client: Requesting list of available tools');
       const toolsResult = await this.mcp.listTools();
-      console.log(`MCP Client: Received ${toolsResult.tools.length} tools from server`);
+      console.log(
+        `MCP Client: Received ${toolsResult.tools.length} tools from server`,
+      );
 
       this.tools = toolsResult.tools;
-      
+
       // Log the names of available tools
-      console.log('MCP Client: Available tools:', this.tools.map(t => t.name).join(', '));
+      console.log(
+        'MCP Client: Available tools:',
+        this.tools.map((t) => t.name).join(', '),
+      );
 
       return this.tools;
     } catch (e) {
@@ -103,14 +108,20 @@ export class MCPClient {
       throw new Error('Not connected to server');
     }
 
-    console.log(`MCP Client: Calling tool '${toolName}' with parameters:`, JSON.stringify(parameters));
-    
+    console.log(
+      `MCP Client: Calling tool '${toolName}' with parameters:`,
+      JSON.stringify(parameters),
+    );
+
     try {
       const result = await this.mcp.callTool(toolName, parameters);
       console.log(`MCP Client: Received response from tool '${toolName}'`);
       return result;
     } catch (error) {
-      console.error(`MCP Client ERROR: Failed to call tool '${toolName}':`, error);
+      console.error(
+        `MCP Client ERROR: Failed to call tool '${toolName}':`,
+        error,
+      );
       throw error;
     }
   }
