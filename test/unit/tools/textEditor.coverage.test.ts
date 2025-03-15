@@ -1,14 +1,14 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import * as path from 'path';
 import * as fs from 'fs/promises';
-import * as fsSync from 'fs';
-import * as childProcess from 'child_process';
+import * as path from 'path';
+
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+
 import { textEditorExecute } from '../../../src/tools/textEditor';
-import { 
-  createTempTestDir, 
-  cleanupTempTestDir, 
+import {
+  createTempTestDir,
+  cleanupTempTestDir,
   copyFixtureToTestDir,
-  ensureTempDirExists
+  ensureTempDirExists,
 } from '../../helpers/fileSystem';
 
 // Setup before all tests
@@ -36,7 +36,7 @@ describe('textEditor additional coverage tests', () => {
     const largeFilePath = path.join(testDir, 'large-file.txt');
     const largeContent = 'A'.repeat(15 * 1024); // 15KB, larger than 10KB limit
     await fs.writeFile(largeFilePath, largeContent, 'utf8');
-    
+
     const result = await textEditorExecute({
       command: 'view',
       path: largeFilePath,
@@ -86,8 +86,12 @@ describe('textEditor additional coverage tests', () => {
   it('should handle empty new_str in str_replace', async () => {
     // Create a file with unique content to replace
     const uniqueFilePath = path.join(testDir, 'unique-content.txt');
-    await fs.writeFile(uniqueFilePath, 'This text has a unique_string to replace.', 'utf8');
-    
+    await fs.writeFile(
+      uniqueFilePath,
+      'This text has a unique_string to replace.',
+      'utf8',
+    );
+
     const result = await textEditorExecute({
       command: 'str_replace',
       path: uniqueFilePath,
@@ -98,7 +102,7 @@ describe('textEditor additional coverage tests', () => {
 
     const content = JSON.parse(result.content[0].text);
     expect(content.success).toBe(true);
-    
+
     // Verify the text was replaced with empty string
     const actualContent = await fs.readFile(uniqueFilePath, 'utf8');
     expect(actualContent).toBe('This text has a  to replace.');
@@ -109,8 +113,12 @@ describe('textEditor additional coverage tests', () => {
   it('should initialize fileStateHistory for str_replace and allow undo', async () => {
     // Create a new file
     const newFilePath = path.join(testDir, 'new-str-replace.txt');
-    await fs.writeFile(newFilePath, 'This is a test string to replace.', 'utf8');
-    
+    await fs.writeFile(
+      newFilePath,
+      'This is a test string to replace.',
+      'utf8',
+    );
+
     // Do a str_replace operation
     let result = await textEditorExecute({
       command: 'str_replace',
@@ -122,22 +130,22 @@ describe('textEditor additional coverage tests', () => {
 
     let content = JSON.parse(result.content[0].text);
     expect(content.success).toBe(true);
-    
+
     // Verify the content was changed
     let fileContent = await fs.readFile(newFilePath, 'utf8');
     expect(fileContent).toBe('This is a modified string to replace.');
-    
+
     // Now undo the operation to verify history was initialized
     result = await textEditorExecute({
       command: 'undo_edit',
       path: newFilePath,
       description: 'Testing undo after str_replace',
     });
-    
+
     content = JSON.parse(result.content[0].text);
     expect(content.success).toBe(true);
     expect(content.message).toContain('Successfully reverted');
-    
+
     // Verify we're back to the original content
     fileContent = await fs.readFile(newFilePath, 'utf8');
     expect(fileContent).toBe('This is a test string to replace.');
@@ -148,7 +156,7 @@ describe('textEditor additional coverage tests', () => {
     // Create a new file
     const newFilePath = path.join(testDir, 'new-insert.txt');
     await fs.writeFile(newFilePath, 'Line 1\nLine 2', 'utf8');
-    
+
     // Do an insert operation
     let result = await textEditorExecute({
       command: 'insert',
@@ -160,22 +168,22 @@ describe('textEditor additional coverage tests', () => {
 
     let content = JSON.parse(result.content[0].text);
     expect(content.success).toBe(true);
-    
+
     // Verify the line was inserted
     let fileContent = await fs.readFile(newFilePath, 'utf8');
     expect(fileContent).toBe('Line 1\nInserted line\nLine 2');
-    
+
     // Now undo the operation to verify history was initialized
     result = await textEditorExecute({
       command: 'undo_edit',
       path: newFilePath,
       description: 'Testing undo after insert',
     });
-    
+
     content = JSON.parse(result.content[0].text);
     expect(content.success).toBe(true);
     expect(content.message).toContain('Successfully reverted');
-    
+
     // Verify we're back to the original content
     fileContent = await fs.readFile(newFilePath, 'utf8');
     expect(fileContent).toBe('Line 1\nLine 2');
@@ -211,7 +219,7 @@ describe('textEditor additional coverage tests', () => {
 
   it('should handle non-existent files', async () => {
     const nonExistentPath = path.join(testDir, 'non-existent-file.txt');
-    
+
     const result = await textEditorExecute({
       command: 'view',
       path: nonExistentPath,
@@ -229,7 +237,7 @@ describe('textEditor additional coverage tests', () => {
     await fs.mkdir(dirPath, { recursive: true });
     await fs.writeFile(path.join(dirPath, 'file1.txt'), 'content', 'utf8');
     await fs.writeFile(path.join(dirPath, 'file2.txt'), 'content', 'utf8');
-    
+
     const result = await textEditorExecute({
       command: 'view',
       path: dirPath,
@@ -264,7 +272,7 @@ describe('textEditor additional coverage tests', () => {
   it('should create a new file', async () => {
     const newFilePath = path.join(testDir, 'new-file.txt');
     const fileContent = 'This is a new file created by the test.';
-    
+
     const result = await textEditorExecute({
       command: 'create',
       path: newFilePath,
@@ -275,7 +283,7 @@ describe('textEditor additional coverage tests', () => {
     const content = JSON.parse(result.content[0].text);
     expect(content.success).toBe(true);
     expect(content.message).toContain('File created');
-    
+
     // Verify file was actually created
     const actualContent = await fs.readFile(newFilePath, 'utf8');
     expect(actualContent).toBe(fileContent);
@@ -283,7 +291,7 @@ describe('textEditor additional coverage tests', () => {
 
   it('should overwrite an existing file', async () => {
     const fileContent = 'This content will overwrite the existing file.';
-    
+
     const result = await textEditorExecute({
       command: 'create',
       path: testFilePath,
@@ -294,7 +302,7 @@ describe('textEditor additional coverage tests', () => {
     const content = JSON.parse(result.content[0].text);
     expect(content.success).toBe(true);
     expect(content.message).toContain('File overwritten');
-    
+
     // Verify file was actually overwritten
     const actualContent = await fs.readFile(testFilePath, 'utf8');
     expect(actualContent).toBe(fileContent);
@@ -315,7 +323,7 @@ describe('textEditor additional coverage tests', () => {
 
   it('should handle non-existent files in str_replace command', async () => {
     const nonExistentPath = path.join(testDir, 'non-existent.txt');
-    
+
     const result = await textEditorExecute({
       command: 'str_replace',
       path: nonExistentPath,
@@ -333,7 +341,7 @@ describe('textEditor additional coverage tests', () => {
     // Create a file with specific content
     const filePath = path.join(testDir, 'specific-content.txt');
     await fs.writeFile(filePath, 'This is specific content.', 'utf8');
-    
+
     const result = await textEditorExecute({
       command: 'str_replace',
       path: filePath,
@@ -350,8 +358,12 @@ describe('textEditor additional coverage tests', () => {
   it('should handle multiple occurrences of old_str', async () => {
     // Create a file with duplicate text
     const duplicateFilePath = path.join(testDir, 'duplicate.txt');
-    await fs.writeFile(duplicateFilePath, 'This is a test. This is a test.', 'utf8');
-    
+    await fs.writeFile(
+      duplicateFilePath,
+      'This is a test. This is a test.',
+      'utf8',
+    );
+
     const result = await textEditorExecute({
       command: 'str_replace',
       path: duplicateFilePath,
@@ -393,7 +405,7 @@ describe('textEditor additional coverage tests', () => {
 
   it('should handle non-existent files in insert command', async () => {
     const nonExistentPath = path.join(testDir, 'non-existent.txt');
-    
+
     const result = await textEditorExecute({
       command: 'insert',
       path: nonExistentPath,
@@ -411,7 +423,7 @@ describe('textEditor additional coverage tests', () => {
     // Create a file with specific content
     const filePath = path.join(testDir, 'insert-test.txt');
     await fs.writeFile(filePath, 'Line 1\nLine 2\nLine 3', 'utf8');
-    
+
     const result = await textEditorExecute({
       command: 'insert',
       path: filePath,
@@ -428,7 +440,7 @@ describe('textEditor additional coverage tests', () => {
   it('should handle undo with no history', async () => {
     const newFilePath = path.join(testDir, 'no-history.txt');
     await fs.writeFile(newFilePath, 'File with no edit history', 'utf8');
-    
+
     const result = await textEditorExecute({
       command: 'undo_edit',
       path: newFilePath,
