@@ -20,8 +20,6 @@ An open-source implementation of the Claude built-in text editor tool as a [Mode
   - Replace text in existing files
   - Insert text at specific line numbers
   - Undo previous edits
-- **Directory Support**: View directory contents
-- **Line Numbering**: Automatically adds line numbers for easier reference
 
 ## Supported Claude Text Editor Versions
 
