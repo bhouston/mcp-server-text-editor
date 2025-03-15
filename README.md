@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/mcp-server-text-editor.svg)](https://www.npmjs.com/package/mcp-server-text-editor)
 [![CI Status](https://github.com/bhouston/mcp-server-text-editor/actions/workflows/tests.yml/badge.svg)](https://github.com/bhouston/mcp-server-text-editor/actions/workflows/tests.yml)
-[![Test Coverage](https://img.shields.io/badge/coverage-65%25-yellow)](https://github.com/bhouston/mcp-server-text-editor)
+[![Test Coverage](https://img.shields.io/badge/coverage-90%89-green)](https://github.com/bhouston/mcp-server-text-editor)
 
 <p align="center">
   <img src="https://mintlify.s3.us-west-1.amazonaws.com/mcp/logo/dark.svg" alt="Model Context Protocol Logo" width="200"/>
