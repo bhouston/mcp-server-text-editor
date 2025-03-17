@@ -1,7 +1,7 @@
 {
   "name": "mcp-server-text-editor",
   "description": "An open source implementation of the Claude built-in text editor tool",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "bin": "bin/cli.js",
   "files": [
