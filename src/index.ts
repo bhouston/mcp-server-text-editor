@@ -13,7 +13,7 @@ const server = new McpServer({
 
 server.tool(
   'text_editor',
-  "A model context protocol server for editing text files that is identical with Claude's built in text editor tool called text_editor_20241022",
+  "View, create, and edit files with persistent state across command calls.  This tool is identical with Claude's built in text editor tool called text_editor_20241022",
   toolParameters,
   textEditorExecute,
 );
